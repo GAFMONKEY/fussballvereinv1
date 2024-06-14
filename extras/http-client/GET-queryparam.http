@@ -1,0 +1,3 @@
+### Suche mit Postleitzahl
+GET {{restUrl}}?plz=76133&name=FB
+Accept: application/hal+json

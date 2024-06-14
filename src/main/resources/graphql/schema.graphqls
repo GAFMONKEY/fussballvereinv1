@@ -1,0 +1,89 @@
+schema {
+  query: Query
+  mutation: Mutation
+}
+
+"Suche nach Fussballvereindaten"
+type Query {
+  "Suche einen Fussballverein mit der ID"
+  fussballverein(id: ID!): Fussballverein
+
+  "Suche Fussballvereine anhand des Vereinnamens oder der Postleitzahl"
+  fussballvereine(input: Suchkriterien): [Fussballverein!]
+}
+
+type Mutation {
+  "Einen neuen Fussballverein anlegen"
+  create(input: FussballvereinInput!): CreatePayload
+}
+
+# https://spec.graphql.org/draft/#sec-Types
+# https://www.graphql-scalars.dev/docs/scalars/email-address
+# https://www.graphql-scalars.dev/docs/scalars/local-date
+"Eigenschaften eines Fussballverein-Datensatzes mit untergeordneten Eigenschaften"
+type Fussballverein {
+  "ID des Fussballvereins"
+  id: ID
+  "Vereinsname des Fussballvereins"
+  name: String!
+  "Email-Adresse des Fussballvereins"
+  email: String!
+  "Datum der Gruendung des Fussballvereins"
+  gruendungsdatum: String!
+  "Postleitzahl des Fussballvereins"
+  plz: String!
+  "Telefonnummer des Fussballvereins"
+  telefonnummer: String
+  "Mannschaften des Fussbalvereins"
+  mannschaften: [Mannschaft]
+}
+
+# https://www.graphql-scalars.dev/docs/scalars/currency
+"Daten zu einer Mannschaft"
+type Mannschaft {
+  "ID der Mannschaft"
+  id: ID
+  "Die Jugend"
+  jugend: String!
+  "Die Anzahl der Mitglieder"
+  anzahlMitglieder: Int!
+}
+
+# https://spec.graphql.org/draft/#sec-Input-Objects
+"Suchkriterien für die Query 'fussballvereine'"
+input Suchkriterien {
+  "Name des gesuchten Vereins"
+  name: String
+  "PLZ des gesuchten Vereins"
+  plz: String
+}
+
+"Eingabedaten für einen neuen Fussballverein"
+input FussballvereinInput {
+  "Vereinsname des Fussballvereins"
+  name: String!
+  "Email-Adresse des Fussballvereins"
+  email: String!
+  "Datum der Gruendung des Vereins"
+  gruendungsdatum: String!
+  "Postleitzahl des Vereins"
+  plz: String!
+  "Telefonnummer des Fussballvereins"
+  telefonnummer: String
+  "Mannschaften des Fussbalvereins"
+  mannschaften: [MannschaftInput]
+}
+
+"Eingabe einer Mannschaft zum Neuanlegen oder Ändern"
+input MannschaftInput {
+  "Die Jugend"
+  jugend: String!
+  "Die Währung"
+  anzahlMitglieder: Int!
+}
+
+"Rückgabetyp beim Neuanlegen eines Fussballvereins"
+type CreatePayload {
+  "ID des neu angelegten Kunden"
+  id: String!
+}

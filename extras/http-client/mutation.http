@@ -1,0 +1,47 @@
+### Einen neuen Fussballverein anlegen
+GRAPHQL {{graphqlUrl}}
+
+mutation {
+  create(
+    input: {
+      name: "SV Philippsburg"
+      email: "svphilippsburg@gmail.com"
+      gruendungsdatum: "1990-02-01"
+      plz: "76661"
+      telefonnummer: "07256 554433"
+      mannschaften: [{
+        jugend: "B"
+        anzahlMitglieder: 20
+      }, {
+        jugend: "A"
+        anzahlMitglieder: 19
+      }]
+    }
+  ) {
+    id
+  }
+}
+
+### Einen neuen Fussballverein mit ungültigem Namen anlegen
+GRAPHQL {{graphqlUrl}}
+
+mutation {
+  create(
+    input: {
+      name: "FB Germersheim???"
+      email: "fbgermersheim@gmx.net"
+      gruendungsdatum: "1980-05-10"
+      plz: "76726"
+      telefonnummer: "07274 888999"
+      mannschaften: [{
+        jugend: "C"
+        anzahlMitglieder: 12
+      }, {
+        jugend: "D"
+        anzahlMitglieder: 17
+      }]
+    }
+  ) {
+    id
+  }
+}

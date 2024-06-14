@@ -1,0 +1,29 @@
+# syntax=docker/dockerfile:1.5.2
+# https://docs.docker.com/engine/reference/builder/#syntax
+# https://hub.docker.com/r/docker/dockerfile
+
+# Copyright (C) 2020 - present Juergen Zimmermann, Hochschule Karlsruhe
+#
+# This program is free software: you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation, either version 3 of the License, or
+# (at your option) any later version.
+#
+# This program is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+#
+# You should have received a copy of the GNU General Public License
+# along with this program.  If not, see <https://www.gnu.org/licenses/>.
+
+# Aufruf:   .\gradlew bootJar
+#           docker buildx -f Dockerfile.einfach --tag docker.io/juergenzimmermann/fussballverein:2023.1.0-dockerfile .
+#           Get-Content Dockerfile | docker run --rm --interactive hadolint/hadolint:2.12.1-beta-debian
+#           docker compose up
+#           docker compose exec fussballverein bash
+
+FROM eclipse-temurin:19.0.1_10-jre-jammy
+WORKDIR /application
+COPY build/libs/fussballverein-*.jar ./application.jar
+ENTRYPOINT ["java", "-jar", "application.jar"]

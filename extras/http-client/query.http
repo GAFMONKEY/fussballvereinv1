@@ -1,0 +1,38 @@
+### Suche mit vorhandener Fussballverein-ID
+GRAPHQL {{graphqlUrl}}
+
+{
+  fussballverein(id: "01000000-0000-0000-0000-000000000000") {
+    name
+    plz
+    mannschaften {
+      jugend
+      anzahlMitglieder
+  }
+  }
+}
+
+### Suche aller Fussballvereine mit dieser Postleitzahl
+GRAPHQL {{graphqlUrl}}
+
+{
+  fussballvereine(input: {plz:"76133"}) {
+  name
+  telefonnummer
+  mannschaften {
+    jugend
+    anzahlMitglieder
+  }
+  }
+}
+
+### Suche aller Fussballvereine
+GRAPHQL {{graphqlUrl}}
+
+{
+  fussballvereine {
+  name
+  telefonnummer
+
+  }
+}

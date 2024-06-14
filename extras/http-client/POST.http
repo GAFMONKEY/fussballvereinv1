@@ -1,0 +1,11 @@
+### Post-Request mit korrekten Daten
+POST {{restUrl}}
+Content-Type: application/json
+
+< data/fussballverein-neu.json
+
+### Post-Request mit ungültigem Vereinsnamen sowie ungültiger Telefonnummer
+POST {{restUrl}}
+Content-Type: application/json
+
+< data/fussballverein-neu-emailvorhanden.json

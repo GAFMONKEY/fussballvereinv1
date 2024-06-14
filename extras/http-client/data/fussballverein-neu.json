@@ -1,0 +1,17 @@
+{
+  "name": "VFR PostRequest",
+  "email": "rest4@test.de",
+  "gruendungsdatum": "2022-04-12",
+  "plz": "76661",
+  "telefonnummer": "012345678",
+  "mannschaften": [{
+    "jugend": "B",
+    "id":"00000000-0000-0000-0000-000000000010",
+    "anzahlMitglieder": "23"
+  },
+    {
+      "jugend": "F",
+      "id":"00000000-0000-0000-0000-000000000011",
+      "anzahlMitglieder": "19"
+    }]
+}

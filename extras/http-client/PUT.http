@@ -1,0 +1,13 @@
+### Einen Fussballverein mittels PUT aktualisieren
+PUT {{restUrl}}/01000000-0000-0000-0000-000000000000
+If-Match: "0"
+Content-Type: application/json
+
+< data/fussballverein-put.json
+
+### Einen Fussballverein mit Fehlerhaften Daten aktualisieren
+PUT {{restUrl}}/01000000-0000-0000-0000-000000000001
+If-Match: "0"
+Content-Type: application/json
+
+< data/fussballverein-put-fehlerhafterVereinsname.json

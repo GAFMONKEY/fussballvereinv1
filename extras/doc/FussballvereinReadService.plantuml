@@ -1,0 +1,44 @@
+@startuml FussballvereinReadService
+
+skinparam classAttributeIconSize 0
+
+package org.springframework.stereotype {
+    interface Service
+}
+
+package java.util {
+    interface List<T>
+    interface Map<K,V>
+    class UUID
+
+    UUID .left[hidden].> Service
+}
+
+package com.acme.fussballverein {
+    package entity {
+        class Fussballverein << entity >>
+
+        Fussballverein .up[hidden].> List
+    }
+
+    package repository {
+        class FussballvereinRepository << control >> << @Repository >>
+    }
+
+    package service #DDDDDD {
+        class FussballvereinReadService << control >> << @Service >> {
+            + findById(id: UUID): Fussballverein
+            + find(queryParams: Map<String, String>): List<Fussballverein>
+        }
+
+        FussballvereinReadService o--> FussballvereinRepository : repo
+        FussballvereinReadService .right.> Fussballverein
+        FussballvereinReadService .up.> Service
+        FussballvereinReadService .up.> UUID
+        FussballvereinReadService .up> List
+        FussballvereinReadService .up.> Map
+    }
+}
+
+hide empty members
+@enduml

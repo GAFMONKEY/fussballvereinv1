@@ -1,0 +1,193 @@
+openapi: "3.0.3"
+info:
+  title: "Poopoo API"
+  description: "Poopoo API"
+  version: "v1"
+servers:
+  - url: "https://localhost:8080"
+paths:
+  /rest/:
+    get:
+      tags:
+        - "Suchen"
+      summary: "Suche mit Suchkriterien"
+      description: ""
+      operationId: ""
+      parameters:
+        - name: "suchkriterien"
+          in: "query"
+          required: true
+          schema:
+            type: "string"
+      responses:
+        "200":
+          description: "OK"
+          content:
+            application/hal+json:
+              schema:
+                $ref: "#/components/schemas/FussballvereinModel"
+    post:
+      tags:
+        - "Neuanlegen"
+      summary: "Einen neuen Fussballverein anlegen."
+      description: ""
+      operationId: ""
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/FussballvereinDTO"
+        required: true
+      responses:
+        "200":
+          description: "OK"
+          content:
+            '*/*':
+              schema:
+                $ref: "#/components/schemas/Void"
+  /rest/{id}:
+    get:
+      tags:
+        - "Suchen"
+      summary: "Suche mit der Fussballverein-ID."
+      description: ""
+      operationId: ""
+      parameters:
+        - name: "id"
+          in: "path"
+          required: true
+          schema:
+            type: "string"
+            format: "uuid"
+      responses:
+        "200":
+          description: "OK"
+          content:
+            application/hal+json:
+              schema:
+                $ref: "#/components/schemas/FussballvereinModel"
+    put:
+      tags:
+        - "Aktualisieren"
+      summary: "Einen Fussballverein mit neuen Werten aktualisieren"
+      description: ""
+      operationId: ""
+      parameters:
+        - name: "id"
+          in: "path"
+          required: true
+          schema:
+            type: "string"
+            format: "uuid"
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/FussballvereinDTO"
+        required: true
+      responses:
+        "204":
+          description: "No Content"
+components:
+  schemas:
+    Fussballverein:
+      type: "object"
+      properties:
+        id:
+          type: "string"
+          format: "uuid"
+        name:
+          type: "string"
+        email:
+          type: "string"
+        gruendungsdatum:
+          type: "string"
+          format: "date"
+        plz:
+          type: "string"
+        telefonnummer:
+          type: "string"
+        mannschaften:
+          type: "array"
+          items:
+            $ref: "#/components/schemas/Mannschaft"
+    Mannschaft:
+      type: "object"
+      properties:
+        id:
+          type: "string"
+          format: "uuid"
+        jugend:
+          type: "string"
+        anzahlmitglieder:
+          type: "integer"
+          format: "int32"
+        fussballverein:
+          $ref: "#/components/schemas/Fussballverein"
+    LinkRelation:
+      type: "object"
+      properties: { }
+    Link:
+      type: "object"
+      properties:
+        rel:
+          $ref: "#/components/schemas/LinkRelation"
+        href:
+          type: "string"
+        hreflang:
+          type: "string"
+        media:
+          type: "string"
+        title:
+          type: "string"
+        type:
+          type: "string"
+        deprecation:
+          type: "string"
+        profile:
+          type: "string"
+        name:
+          type: "string"
+    FussballvereinModel:
+      type: "object"
+      properties:
+        name:
+          type: "string"
+        email:
+          type: "string"
+        gruendungsdatum:
+          type: "string"
+          format: "date"
+        plz:
+          type: "string"
+        telefonnummer:
+          type: "string"
+        mannschaften:
+          type: "array"
+          items:
+            $ref: "#/components/schemas/Mannschaft"
+        links:
+          type: "array"
+          items:
+            $ref: "#/components/schemas/Link"
+    FussballvereinDTO:
+      type: "object"
+      properties:
+        name:
+          type: "string"
+        email:
+          type: "string"
+        gruendungsdatum:
+          type: "string"
+          format: "date"
+        plz:
+          type: "string"
+        telefonnummer:
+          type: "string"
+        mannschaften:
+          type: "array"
+          items:
+            $ref: "#/components/schemas/Mannschaft"
+    Void:
+      type: "object"
+      properties: { }

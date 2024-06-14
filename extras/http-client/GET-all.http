@@ -1,0 +1,2 @@
+GET {{restUrl}}
+Accept: application/hal+json

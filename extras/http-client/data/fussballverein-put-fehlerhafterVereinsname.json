@@ -1,0 +1,21 @@
+{
+  "name": "VFR;)Rheinsheim",
+  "email": "vfr@web.de",
+  "gruendungsdatum": "1945-01-01",
+  "plz": "76661",
+  "telefonnummer": "07256 123456",
+  "mannschaften": [
+    {
+      "jugend": "Bambini",
+      "id": "00000000-0000-0000-0000-000000000001",
+      "anzahlMitglieder": 25,
+      "fussballverein": "00000000-0000-0000-0000-000000000000"
+    },
+    {
+      "jugend": "E",
+      "id": "00000000-0000-0000-0000-000000000003",
+      "anzahlMitglieder": 30,
+      "fussballverein": "00000000-0000-0000-0000-000000000000"
+    }
+  ]
+}

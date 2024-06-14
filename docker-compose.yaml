@@ -1,0 +1,427 @@
+# Copyright (C) 2023 - present Juergen Zimmermann, Hochschule Karlsruhe
+#
+# This program is free software: you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation, either version 3 of the License, or
+# (at your option) any later version.
+#
+# This program is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+#
+# You should have received a copy of the GNU General Public License
+# along with this program.  If not, see <https://www.gnu.org/licenses/>.
+
+# Aufruf:   docker compose up [postgres pgadmin]
+#           docker compose down
+
+# https://docs.docker.com/compose/compose-file
+# https://docs.docker.com/compose/compose-file/compose-file-v3
+
+# https://docs.docker.com/compose/compose-file/05-services
+services:
+  # ------------------------------------------------------------------------------------
+  # P o s t g r e S Q L
+  # ------------------------------------------------------------------------------------
+
+  # https://stackoverflow.com/questions/76345884/how-to-select-specific-services-of-docker-compose-when-using-spring-boot-docker
+  # https://docs.docker.com/compose/profiles
+  # https://docs.spring.io/spring-boot/docs/current/reference/htmlsingle/#features.docker-compose.profiles
+
+  postgres:
+    image: postgres:15.3-bookworm
+    ports:
+      - published: 5432
+        target: 5432
+        protocol: tcp
+    # https://docs.docker.com/compose/profiles
+    profiles: [ postgres ]
+    # https://docs.docker.com/compose/networking
+    networks: [ fussballverein-network ]
+    volumes:
+      - type: bind
+        source: C:/Zimmermann/volumes/postgres/data
+        target: /var/lib/postgresql/data
+      - type: bind
+        source: C:/Zimmermann/volumes/postgres/postgresql.conf
+        target: /etc/postgresql/postgresql.conf
+        read_only: true
+      - type: bind
+        source: C:/Zimmermann/volumes/postgres/tablespace
+        target: /var/lib/postgresql/tablespace
+      - type: bind
+        source: C:/Zimmermann/volumes/postgres/sql
+        target: /sql
+        read_only: true
+    # https://docs.docker.com/compose/environment-variables/set-environment-variables
+    environment:
+      - POSTGRES_PASSWORD=p
+      - TZ=Europe/Berlin
+      - PGTZ=Europe/Berlin
+      #PGDATA: /var/lib/postgresql/data
+      # https://www.postgresql.org/docs/current/auth-trust.html
+      #POSTGRES_HOST_AUTH_METHOD: trust
+    user: "postgres:postgres"
+    security_opt:
+      - label:user:postgres
+      - no-new-privileges:true
+    container_name: postgres
+    hostname: postgres
+    healthcheck:
+      test:
+        [
+          CMD,
+          pg_isready,
+          --dbname,
+          postgres,
+          --username,
+          postgres
+        ]
+      interval: 5s
+      timeout: 2s
+      start_period: 5s
+    # https://docs.docker.com/compose/compose-file/deploy
+    deploy:
+      # https://docs.docker.com/compose/compose-file/deploy/#resources
+      resources:
+        limits:
+          cpus: "2.0"
+          memory: 1G
+        reservations:
+          cpus: "1.0"
+          memory: 512M
+
+  # ------------------------------------------------------------------------------------
+  # p g a d m i n
+  # ------------------------------------------------------------------------------------
+  # http://localhost:8888 mit Emailadresse "pgadmin@acme.com" und Passwort "p"
+  pgadmin:
+    image: dpage/pgadmin4:7.3
+    ports:
+      - published: 8888
+        target: 80
+        protocol: tcp
+    profiles: [ postgres ]
+    networks: [ fussballverein-network ]
+    volumes:
+      - type: bind
+        source: C:/Zimmermann/volumes/postgres/pgadmin
+        # https://www.pgadmin.org/docs/pgadmin4/latest/container_deployment.html
+        target: /var/lib/pgadmin
+      - type: bind
+        source: C:/Zimmermann/volumes/postgres/pgadmin4
+        target: /var/lib/pgadmin4
+    environment:
+      - PGADMIN_DEFAULT_EMAIL=pgadmin@acme.com
+      - PGADMIN_DEFAULT_PASSWORD=p
+    user: "pgadmin:5050"
+    container_name: pgadmin
+    hostname: pgadmin
+    deploy:
+      resources:
+        limits:
+          cpus: "2.0"
+          memory: 2G
+        reservations:
+          cpus: "1.0"
+          memory: 1G
+
+  # ------------------------------------------------------------------------------------
+  # M y S Q L
+  # ------------------------------------------------------------------------------------
+  mysql:
+    image: mysql:8.0.33-oracle
+    ports:
+      - published: 3306
+        target: 3306
+    profiles: [ mysql ]
+    networks: [ fussballverein-network ]
+    volumes:
+      - type: bind
+        source: C:/Zimmermann/volumes/mysql/db
+        target: /var/lib/mysql
+      - type: bind
+        source: C:/Zimmermann/volumes/mysql/mysqld
+        target: /var/run/mysqld
+      - type: bind
+        source: C:/Zimmermann/volumes/mysql/run-mysqld
+        target: /run/mysqld
+      - type: bind
+        source: C:/Zimmermann/volumes/mysql/log
+        target: /var/log
+      - type: bind
+        source: C:/Zimmermann/volumes/mysql/tmp
+        target: /tmp
+      - type: bind
+        source: C:/Zimmermann/volumes/mysql/sql
+        target: /sql
+        read_only: true
+    environment:
+      - PMA_HOST=mysql
+      - MYSQL_ROOT_PASSWORD=p
+      - TZ=Europe/Berlin
+    security_opt:
+      - label:user:mysql
+      - no-new-privileges:true
+    container_name: mysql
+    hostname: mysql
+    healthcheck:
+      test:
+        [
+          CMD,
+          mysqladmin,
+          --user=root,
+          --password=p,
+          --host=mysql,
+          ping
+        ]
+      interval: 5s
+      timeout: 2s
+      start_period: 5s
+    deploy:
+      resources:
+        limits:
+          cpus: "2.0"
+          memory: 1G
+        reservations:
+          cpus: "1.0"
+          memory: 512M
+
+  # ------------------------------------------------------------------------------------
+  # p h p M y A d m i n
+  # ------------------------------------------------------------------------------------
+  phpmyadmin:
+    image: phpmyadmin/phpmyadmin:5.2.1
+    links: [ mysql ]
+    ports:
+      - published: 8889
+        target: 80
+    profiles: [ mysql ]
+    networks: [ fussballverein-network ]
+    environment:
+      - MYSQL_ROOT_PASSWORD=p
+      - PMA_HOST=mysql
+      - PMA_PORT=3306
+      - PMA_ARBITRARY=1
+    # kein dedizierter User im Image vorhanden
+    container_name: phpmyadmin
+    # https://github.com/phpmyadmin/docker/issues/293
+    hostname: phpmyadmin.mysql.docker
+    deploy:
+      resources:
+        limits:
+          cpus: "0.5"
+          memory: 768M
+        reservations:
+          cpus: "0.5"
+          memory: 768M
+
+  # ------------------------------------------------------------------------------------
+  # O r a c l e
+  # ------------------------------------------------------------------------------------
+  oracle:
+    # 2 statt 12 GB; u.a. genutzt fuer die Entwicklung von Hibernate und Spring Data JPA
+    image: gvenzl/oracle-free:23.2-slim
+    #image: container-registry.oracle.com/database/express
+    ports:
+      - published: 1521
+        target: 1521
+      # https://github.com/gvenzl/oci-oracle-xe/issues/174
+      - published: 5500
+        target: 5500
+    profiles: [ oracle ]
+    networks: [ fussballverein-network ]
+    volumes:
+      - type: bind
+        source: C:/Zimmermann/volumes/oracle/oradata
+        target: /opt/oracle/oradata
+      - type: bind
+        source: C:/Zimmermann/volumes/oracle/sql
+        target: /sql
+    environment:
+      - TZ=Europe/Berlin
+        # Passwort fuer SYS, SYSTEM und PDBADMIN: nur beim 1. Aufruf setzen
+      - ORACLE_PASSWORD=p
+      #- ORACLE_DATABASE=FREEPDB1
+        # SGA (= System Global Area) fuer Cache
+      #- INIT_SGA_SIZE=64M
+        # PGA (= Program Global Area) fuer Stored Procedures
+      #- INIT_PGA_SIZE=10M
+    # user: oracle:oinstall
+    container_name: XE
+    hostname: XE
+    healthcheck:
+      # /opt/oracle/healthcheck.sh
+      # https://stackoverflow.com/questions/50217637/how-do-i-check-if-oracle-is-up-in-docker
+      #test: [ CMD, bash, -c, healthcheck.sh ]
+      test:
+        [
+          CMD,
+          bash,
+          -c,
+          "echo 'SELECT 1 FROM dual;' | sqlplus sys/p@XE as sysdba"
+        ]
+      interval: 120s
+      timeout: 5s
+      start_period: 30s
+    deploy:
+      resources:
+        limits:
+          cpus: "2.0"
+          # https://www.esolution.ca/oracle-database-xe-system-requirements
+          # TODO https://github.com/gvenzl/oci-oracle-xe/issues/168
+          memory: 2048M
+        reservations:
+          cpus: "1.0"
+          memory: 512M
+
+  # ------------------------------------------------------------------------------------
+  # f a k e s m t p
+  # ------------------------------------------------------------------------------------
+  fakesmtp:
+    # https://hub.docker.com/r/gessnerfl/fake-smtp-server
+    # https://hub.docker.com/r/greenmail/standalone
+    image: gessnerfl/fake-smtp-server:2.1.0
+    ports:
+      - published: 5025
+        target: 8025
+        protocol: tcp
+      - published: 5080
+        target: 8080
+        protocol: tcp
+      - published: 5081
+        target: 8081
+        protocol: tcp
+    profiles: [ fakesmtp ]
+    networks: [ fussballverein-network ]
+    volumes:
+      - type: bind
+        source: C:/Zimmermann/volumes/fakesmtp
+        target: /tmp
+    environment:
+      - TZ=Europe/Berlin
+      - SPRING_OUTPUT_ANSI_ENABLED=ALWAYS
+      - SPRING_MAIN_BANNER-MODE=LOG
+      - SPRING_LAZY-INITIALIZATION=true
+      - SPRING_JPA_OPEN-IN-VIEW=true
+    container_name: fakesmtp
+    hostname: fakesmtp
+    cap_drop: [ ALL ]
+    stop_grace_period: 3s
+    deploy:
+      resources:
+        limits:
+          cpus: "0.5"
+          memory: 768M
+        reservations:
+          cpus: "0.5"
+          memory: 768M
+
+  # ------------------------------------------------------------------------------------
+  # T r i v y
+  # ------------------------------------------------------------------------------------
+  trivy:
+    image: aquasec/trivy:0.42.0
+    command: [image, juergenzimmermann/fussballverein:2023.1.0]
+    profiles: [ trivy ]
+    volumes:
+      - type: bind
+        source: //var/run/docker.sock
+        target: /var/run/docker.sock
+      - type: bind
+        source: C:/Zimmermann/volumes/trivy
+        target: /root/.cache
+    deploy:
+      resources:
+        limits:
+          cpus: "2.0"
+          memory: 2048M
+
+  # ------------------------------------------------------------------------------------
+  # S o n a r Q u b e
+  # ------------------------------------------------------------------------------------
+  sonar:
+    image: sonarqube:10.0.0-community
+    ports:
+      # Port fuer HTTP
+      - published: 9000
+        target: 9000
+      # Port fuer H2
+      - published: 9092
+        target: 9092
+    profiles: [ sonar ]
+    volumes:
+      - type: bind
+        source: C:/Zimmermann/volumes/sonarqube/data
+        target: /opt/sonarqube/data
+      - type: bind
+        source: C:/Zimmermann/volumes/sonarqube/logs
+        target: /opt/sonarqube/logs
+      - type: bind
+        source: C:/Zimmermann/volumes/sonarqube/language-plugins
+        target: /opt/sonarqube/lib/extensions
+        read_only: true
+    environment:
+      - TZ=Europe/Berlin
+    container_name: sonar
+    hostname: sonar
+    deploy:
+      resources:
+        limits:
+          cpus: "2.0"
+          memory: 2048M
+        reservations:
+          cpus: "2.0"
+          memory: 2048M
+
+  # ------------------------------------------------------------------------------------
+  # f u s s b a l l v e r e i n
+  # ------------------------------------------------------------------------------------
+  fussballverein:
+    image: juergenzimmermann/fussballverein:2023.1.1
+    #image: juergenzimmermann/fussballverein:2023.1.1-jammy
+    #image: juergenzimmermann/fussballverein:2023.1.1-ubi9
+    depends_on:
+      postgres:
+      #mysql:
+      #oracle:
+        condition: service_healthy
+    ports:
+      #- published: 8080-8081
+      - published: 8080
+        target: 8080
+        protocol: tcp
+    # https://docs.docker.com/compose/profiles
+    profiles: [ fussballverein ]
+    # https://docs.docker.com/compose/networking
+    networks: [ fussballverein-network ]
+    volumes:
+      - type: bind
+        source: src\main\resources\application.container.yml
+        target: /workspace/BOOT-INF/classes/application.yml
+        read_only: true
+      - type: bind
+        source: C:\Zimmermann\volumes\fussballverein-v2
+        target: /tmp
+    # https://docs.docker.com/compose/environment-variables/set-environment-variables
+    env_file: [ docker-compose.env ]
+    hostname: fussballverein
+    # https://docs.docker.com/compose/compose-file/compose-file-v3/#cap_add-cap_drop
+    cap_drop: [ ALL ]
+    deploy:
+      # https://docs.docker.com/compose/compose-file/deploy/#resources
+      resources:
+        limits:
+          cpus: "2.0"
+          memory: 1G
+        reservations:
+          cpus: "1.0"
+          memory: 768M
+      # https://docs.docker.com/compose/compose-file/deploy/#replicas
+      #replicas: 2
+      #endpoint_mode: vip
+
+# https://docs.docker.com/compose/compose-file/06-networks
+networks:
+  fussballverein-network: {}

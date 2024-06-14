@@ -1,0 +1,42 @@
+@startuml Fussballverein
+
+skinparam classAttributeIconSize 0
+' skinparam monochrome true
+
+package java {
+    package util {
+        class UUID
+        interface List<T>
+    }
+
+    package time {
+        class LocalDate
+    }
+
+    UUID .[hidden].> LocalDate
+}
+
+package com.acme.fussballverein.entity #DDDDDD {
+
+    class Mannschaft {
+        jugend: String
+        anzahlMitglieder: int
+    }
+
+    class Fussballverein << entity >> {
+        id : UUID
+        name : String
+        email : String
+        plz : String
+        gruendungsdatum: LocalDate
+        telefonnummer: String
+    }
+
+    Fussballverein *--> "0..*" Mannschaft : mannschaft
+    Fussballverein .right.> UUID
+    Fussballverein .right.> LocalDate
+    Fussballverein .right.> List
+}
+
+hide empty members
+@enduml

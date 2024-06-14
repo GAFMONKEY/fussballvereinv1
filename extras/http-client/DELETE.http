@@ -1,0 +1,5 @@
+### Löschen mit vorhandener Kunde-ID
+DELETE {{restUrl}}/01000000-0000-0000-0000-000000000000
+
+### Löschen mit nicht-vorhandener Kunde-ID: 204 (No Content)
+DELETE {{restUrl}}/FFFFFFFF-FFFF-FFFF-FFFF-FFFFFFFFFFFF
